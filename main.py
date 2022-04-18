@@ -2,9 +2,8 @@
 #  All rigths reserved.
 import numpy as np
 import cv2 as cv
-from matplotlib import pyplot as plt
 import sys
-from  PIL  import Image
+from PIL import Image
 
 
 def size_of_images():
@@ -12,14 +11,24 @@ def size_of_images():
     return image_list
 
 
-def convert_png_transparent(src_file, dst_file):
-    img = cv.imread(src_file, cv.IMREAD_UNCHANGED)
+def convert_jpeg_into_png(src_file, jpeg_image):
+    jpeg_image.save(src_file + "_png.PNG", "PNG")
+    return jpeg_image
+
+
+def convert_png_into_transparent_image(src_file, dst_file):
+    image = Image.open(src_file)
+    if image.format == 'JPG':
+        image = convert_jpeg_into_png(src_file, image)
+        img = cv.imread(image.filename, cv.IMREAD_UNCHANGED)
+    else:
+        img = cv.imread(src_file, cv.IMREAD_UNCHANGED)
+
     original = img.copy()
 
     l = int(max(5, 6))
     u = int(min(6, 6))
 
-    ed = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
     edges = cv.GaussianBlur(img, (21, 51), 3)
     edges = cv.cvtColor(edges, cv.COLOR_BGR2GRAY)
     edges = cv.Canny(edges, l, u)
@@ -64,7 +73,7 @@ def convert_png_transparent(src_file, dst_file):
 
     img.putdata(newData)
     img.save(dst_file, "PNG")
-    print ("successfully")
+    print("successfully")
     return img
 
 
@@ -78,7 +87,6 @@ def resize_image(image_to_resize, dst_file):
         copy_image.thumbnail((image_value_width, image_value_height))
         copy_image.save(dst_file + image_values_splitted[0] + 'x' + image_values_splitted[1] + '.png', "PNG")
 
-
     print('image resized generated successfully')
     return image_to_resize
 
@@ -88,8 +96,8 @@ def show_image(image):
 
 
 if __name__ == '__main__':
-    const_src_file = 'images/tuturu.png'
+    const_src_file = 'images/tuturu.jpg'
     const_dst_file = 'images/tuturu_transparent.png'
-    result_transparent_image = convert_png_transparent(const_src_file, const_dst_file)
+    result_transparent_image = convert_png_into_transparent_image(const_src_file, const_dst_file)
     new_image = resize_image(result_transparent_image, const_dst_file)
     show_image(new_image)
